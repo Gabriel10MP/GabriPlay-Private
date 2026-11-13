@@ -59,7 +59,7 @@ let currentUser=null,selectedFiles=[],albums=[],activeAlbum=null,allFiles=[],met
 const say=(el,msg,error=false)=>{el.textContent=msg;el.classList.toggle("error",error)};
 const safeName=name=>name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-90)||"imagen";
 const bytes=n=>n<1024*1024?(n/1024).toFixed(0)+" KB":(n/1024/1024).toFixed(1)+" MB";
-function setSession(user){currentUser=user;login.classList.toggle("hidden",!!user);workspace.classList.toggle("hidden",!user);$("logout").classList.toggle("hidden",!user);$("intro").classList.toggle("hidden",!!user);if(user){$("accountEmail").textContent=user.email||"Cuenta autorizada";loadAlbums();}}
+function setSession(user){currentUser=user;login.classList.toggle("hidden",!!user);workspace.classList.toggle("hidden",!user);$("logout").classList.toggle("hidden",!user);$("intro").classList.toggle("hidden",!!user);if(user){$("accountEmail").textContent=user.email||"Cuenta autorizada";refreshSecurity();loadAlbums();}}
 async function verifyAdmin(user){const {data,error}=await client.from("gabriplay_admins").select("user_id").eq("user_id",user.id).maybeSingle();if(error)throw error;if(!data)throw new Error("Esta cuenta no tiene permiso para entrar en GabriPlay Private.");}
 client.auth.getSession().then(async({data,error})=>{if(error){say(loginMsg,error.message,true);return;}if(data.session){try{await verifyAdmin(data.session.user);setSession(data.session.user);}catch(e){await client.auth.signOut();say(loginMsg,e.message,true);}}});
 client.auth.onAuthStateChange((_event,session)=>{if(!session){setSession(null);return;}window.setTimeout(async()=>{try{await verifyAdmin(session.user);setSession(session.user);}catch(e){await client.auth.signOut();say(loginMsg,e.message,true);}},0);});
